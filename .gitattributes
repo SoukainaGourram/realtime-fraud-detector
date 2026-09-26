@@ -1,0 +1,7 @@
+# Ignore frontend files in GitHub language statistics
+dashboard-frontend/** linguist-vendored
+*.html linguist-vendored
+*.scss linguist-vendored
+*.ts linguist-vendored
+*.json linguist-vendored
+.angular/** linguist-vendored

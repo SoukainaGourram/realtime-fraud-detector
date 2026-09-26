@@ -1,0 +1,144 @@
+/* Global Design System - Call Guard (Telecom Telecom) */
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+
+:root {
+  --bg-main: #0d0e17;
+  --bg-sidebar: #131420;
+  --bg-card: #181a28;
+  --bg-card-hover: #1e2032;
+  --border-color: rgba(255, 255, 255, 0.07);
+  --border-focus: #ab47bc;
+
+  --telecom-primary: #8e24aa;
+  --telecom-primary-light: #ba68c8;
+  --telecom-magenta: #e91e63;
+  --telecom-dark: #0d0e17;
+  --telecom-accent: #b388ff;
+
+  --color-success: #00e676;
+  --color-warning: #ffb74d;
+  --color-danger: #ff5252;
+  --color-info: #40c4ff;
+
+  --text-main: #f3f4f9;
+  --text-muted: #8c93b0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  overflow-x: hidden;
+}
+
+/* Scrollbars personnalisées */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-main);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--telecom-primary);
+}
+
+/* Material Overrides */
+.mat-mdc-card {
+  background-color: var(--bg-card) !important;
+  color: var(--text-main) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* Inputs & Form Fields */
+.mat-mdc-form-field {
+  .mdc-text-field--outlined {
+    background-color: rgba(255, 255, 255, 0.02) !important;
+    border-radius: 8px;
+  }
+  .mdc-notched-outline__leading,
+  .mdc-notched-outline__notch,
+  .mdc-notched-outline__trailing {
+    border-color: rgba(255, 255, 255, 0.12) !important;
+  }
+  &:hover .mdc-notched-outline__leading,
+  &:hover .mdc-notched-outline__notch,
+  &:hover .mdc-notched-outline__trailing {
+    border-color: var(--telecom-primary-light) !important;
+  }
+  .mat-mdc-input-element,
+  .mat-mdc-select-value {
+    color: #fff !important;
+  }
+  .mat-mdc-form-field-icon-prefix {
+    color: var(--text-muted);
+  }
+}
+
+/* Badges de risque */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+
+  &.badge-critical {
+    background: rgba(255, 82, 82, 0.18);
+    color: #ff5252;
+    border: 1px solid rgba(255, 82, 82, 0.4);
+    box-shadow: 0 0 10px rgba(255, 82, 82, 0.2);
+  }
+  &.badge-high {
+    background: rgba(255, 152, 0, 0.18);
+    color: #ffa726;
+    border: 1px solid rgba(255, 152, 0, 0.4);
+  }
+  &.badge-medium {
+    background: rgba(255, 202, 40, 0.18);
+    color: #ffd54f;
+    border: 1px solid rgba(255, 202, 40, 0.4);
+  }
+  &.badge-low {
+    background: rgba(0, 230, 118, 0.15);
+    color: #69f0ae;
+    border: 1px solid rgba(0, 230, 118, 0.35);
+  }
+  &.badge-new {
+    background: rgba(64, 196, 255, 0.18);
+    color: #40c4ff;
+    border: 1px solid rgba(64, 196, 255, 0.35);
+  }
+  &.badge-confirmed {
+    background: rgba(255, 82, 82, 0.2);
+    color: #ff5252;
+    border: 1px solid rgba(255, 82, 82, 0.4);
+  }
+  &.badge-false_positive {
+    background: rgba(0, 230, 118, 0.18);
+    color: #69f0ae;
+    border: 1px solid rgba(0, 230, 118, 0.35);
+  }
+  &.badge-reviewed {
+    background: rgba(158, 158, 158, 0.18);
+    color: #bdbdbd;
+    border: 1px solid rgba(158, 158, 158, 0.3);
+  }
+}

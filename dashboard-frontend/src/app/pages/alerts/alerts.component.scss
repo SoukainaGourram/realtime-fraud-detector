@@ -1,0 +1,311 @@
+.page-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+
+  h1 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #f1f1f7;
+
+    mat-icon {
+      color: #ff9800;
+      font-size: 1.9rem;
+      width: 1.9rem;
+      height: 1.9rem;
+    }
+  }
+
+  .subtitle {
+    margin: 4px 0 0 0;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 12px;
+  }
+}
+
+// Filtres
+.filter-panel {
+  background: rgba(26, 27, 43, 0.8) !important;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+
+  .filter-form {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 6px 0;
+
+    .filter-field {
+      flex: 2;
+      min-width: 260px;
+    }
+    .filter-field-small {
+      flex: 1;
+      min-width: 180px;
+    }
+
+    .filter-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+  }
+}
+
+// Layout Split
+.content-split {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+
+  .table-card {
+    flex: 1;
+    min-width: 0;
+    background: rgba(26, 27, 43, 0.8) !important;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .detail-sidebar {
+    width: 380px;
+    flex-shrink: 0;
+    background: rgba(28, 29, 46, 0.95) !important;
+    border: 1px solid rgba(233, 30, 99, 0.3);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    animation: slideLeft 0.3s ease-out;
+
+    .sidebar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+
+      h3 {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0;
+        font-size: 1.15rem;
+        color: #fff;
+
+        mat-icon {
+          color: var(--telecom-magenta);
+        }
+      }
+
+      .alert-id {
+        font-size: 0.72rem;
+        color: var(--text-muted);
+        word-break: break-all;
+      }
+    }
+
+    .sidebar-content {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+
+      .meta-item {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        .lbl {
+          font-size: 0.75rem;
+          text-transform: uppercase;
+          color: #8890b5;
+          letter-spacing: 0.5px;
+          font-weight: 600;
+        }
+
+        .val {
+          font-size: 0.95rem;
+          color: #f1f1f7;
+        }
+
+        .score-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 4px;
+
+          .score-number {
+            font-weight: 800;
+            font-size: 1rem;
+            color: #ffd54f;
+          }
+        }
+
+        .description-box {
+          background: rgba(0, 0, 0, 0.25);
+          border: 1px solid rgba(255, 255, 255, 0.05);
+          padding: 10px 12px;
+          border-radius: 6px;
+          font-size: 0.85rem;
+          color: #d1d5db;
+          line-height: 1.4;
+          margin: 0;
+        }
+
+        .rules-list {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+          margin-top: 4px;
+
+          .rule-chip {
+            background: rgba(142, 36, 170, 0.2);
+            color: #ce93d8;
+            border: 1px solid rgba(142, 36, 170, 0.4);
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+          }
+        }
+      }
+
+      .actions-section {
+        margin-top: 10px;
+        padding-top: 16px;
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+
+        .lbl {
+          font-size: 0.75rem;
+          text-transform: uppercase;
+          color: #8890b5;
+          letter-spacing: 0.5px;
+          font-weight: 600;
+        }
+
+        .action-buttons {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+
+          .btn-block {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-weight: 600;
+          }
+
+          .btn-fp {
+            border-color: rgba(0, 230, 118, 0.4);
+            color: #69f0ae;
+
+            &:hover {
+              background: rgba(0, 230, 118, 0.1);
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Table
+.table-wrapper {
+  overflow-x: auto;
+
+  .modern-table {
+    width: 100%;
+    background: transparent;
+
+    th.mat-header-cell {
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border-color);
+      padding: 14px 16px;
+    }
+
+    td.mat-cell {
+      padding: 12px 16px;
+      color: #e2e4ef;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      font-size: 0.9rem;
+    }
+
+    tr.mat-row {
+      cursor: pointer;
+      transition: background 0.15s;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.04);
+      }
+
+      &.selected-row {
+        background: rgba(233, 30, 99, 0.15) !important;
+        border-left: 3px solid var(--telecom-magenta);
+      }
+    }
+  }
+}
+
+.type-tag {
+  color: #b388ff;
+  font-weight: 600;
+}
+
+.score-badge {
+  font-weight: 700;
+  color: #ffd54f;
+}
+
+.highlight-number {
+  color: #ff5252;
+  font-size: 1.2rem;
+}
+
+.text-accent {
+  color: var(--telecom-primary-light);
+}
+
+.font-mono {
+  font-family: 'SFMono-Regular', Consolas, Menlo, monospace;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideLeft {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}

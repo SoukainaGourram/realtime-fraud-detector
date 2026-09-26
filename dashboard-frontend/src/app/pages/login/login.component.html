@@ -1,0 +1,51 @@
+<div class="login-wrapper">
+  <div class="login-glow"></div>
+  
+  <mat-card class="login-card">
+    <div class="login-brand">
+      <div class="brand-icon">
+        <mat-icon>shield</mat-icon>
+      </div>
+      <h2>CALL GUARD</h2>
+      <span class="telecom-badge">Plateforme Télécom Telecom</span>
+      <p class="brand-desc">Détection d'Anomalies & Surveillance CDR en Temps Réel</p>
+    </div>
+
+    <mat-card-content>
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Nom d'utilisateur</mat-label>
+          <mat-icon matPrefix>person</mat-icon>
+          <input matInput formControlName="username" placeholder="ex: admin" autocomplete="username" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Mot de passe</mat-label>
+          <mat-icon matPrefix>lock</mat-icon>
+          <input matInput type="password" formControlName="password" placeholder="••••••••" autocomplete="current-password" />
+        </mat-form-field>
+
+        <div class="error-banner" *ngIf="errorMessage">
+          <mat-icon>error_outline</mat-icon>
+          <span>{{ errorMessage }}</span>
+        </div>
+
+        <button mat-flat-button color="primary" type="submit" [disabled]="loading || loginForm.invalid" class="submit-btn">
+          <mat-spinner diameter="20" *ngIf="loading"></mat-spinner>
+          <span *ngIf="!loading">Accéder à la Plateforme &rarr;</span>
+        </button>
+      </form>
+
+      <div class="demo-box">
+        <div class="demo-title">
+          <mat-icon>info</mat-icon> Comptes de Démonstration (Projet)
+        </div>
+        <div class="demo-tags">
+          <span class="demo-chip"><strong>admin</strong> / admin123</span>
+          <span class="demo-chip"><strong>analyst</strong> / admin123</span>
+          <span class="demo-chip"><strong>viewer</strong> / admin123</span>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

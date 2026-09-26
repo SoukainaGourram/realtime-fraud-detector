@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres:5432/${POSTGRES_DB:fraud_db}
+    username: ${POSTGRES_USER:fraud_user}
+    password: ${POSTGRES_PASSWORD:fraud_pass_2024}
+  
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
+
+jwt:
+  secret: ${JWT_SECRET:telecom_fraud_detection_super_secret_key_2024_projet_soukaina}
+  expiration: ${JWT_EXPIRATION:86400000}

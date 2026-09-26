@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: cdr-simulator
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all
+      retries: 3
+simulator:
+  kafka-topic: cdrs
+  rate-per-second: ${SIMULATOR_RATE:10}
+  fraud-ratio: ${SIMULATOR_FRAUD_RATIO:0.15}
+  num-normal-lines: 50
+  num-fraud-lines: 10
+logging:
+  level:
+    com.telecom.simulator: INFO

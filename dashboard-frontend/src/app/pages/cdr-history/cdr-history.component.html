@@ -1,0 +1,260 @@
+<div class="page-container">
+  <!-- En-tête de la page -->
+  <div class="page-header">
+    <div class="header-info">
+      <h1><mat-icon>history_edu</mat-icon> Consultation de l'Historique CDR</h1>
+      <p class="subtitle">Recherche multicritère et exploration des enregistrements bruts du réseau (Voix & Sessions Data)</p>
+    </div>
+    <div class="header-actions">
+      <button mat-flat-button color="primary" (click)="loadCdrs()" [disabled]="loading">
+        <mat-icon>refresh</mat-icon> Actualiser
+      </button>
+    </div>
+  </div>
+
+  <!-- Cartes KPI CDR (Voix vs Data) -->
+  <div class="stats-grid" *ngIf="stats">
+    <div class="stat-card">
+      <div class="stat-icon total"><mat-icon>receipt_long</mat-icon></div>
+      <div class="stat-details">
+        <span class="label">Total CDRs Enregistrés</span>
+        <span class="value">{{ stats.totalCdrs | number }}</span>
+      </div>
+    </div>
+
+    <div class="stat-card voice">
+      <div class="stat-icon voice-icon"><mat-icon>call</mat-icon></div>
+      <div class="stat-details">
+        <span class="label">Trafic Voix</span>
+        <span class="value">{{ stats.voiceCount | number }} <small>appels</small></span>
+        <span class="subtext">{{ stats.totalVoiceDurationMinutes | number }} min au total</span>
+      </div>
+    </div>
+
+    <div class="stat-card data">
+      <div class="stat-icon data-icon"><mat-icon>language</mat-icon></div>
+      <div class="stat-details">
+        <span class="label">Sessions Data</span>
+        <span class="value">{{ stats.dataCount | number }} <small>sessions</small></span>
+        <span class="subtext">{{ stats.totalDataVolumeMb | number:'1.0-1' }} Mo transférés</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Barre de filtres de recherche -->
+  <mat-card class="filter-panel">
+    <mat-card-content class="filter-form">
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Numéro MSISDN (Appelant / Appelé)</mat-label>
+        <mat-icon matPrefix>search</mat-icon>
+        <input matInput [(ngModel)]="filterMsisdn" placeholder="Ex: +212600000001" (keyup.enter)="applyFilter()">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field-small">
+        <mat-label>Type de Service</mat-label>
+        <mat-select [(ngModel)]="filterServiceType" (selectionChange)="applyFilter()">
+          <mat-option value="">Tous les services</mat-option>
+          <mat-option value="VOICE">📞 Voix uniquement</mat-option>
+          <mat-option value="DATA">🌐 Data uniquement</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field-small">
+        <mat-label>Statut</mat-label>
+        <mat-select [(ngModel)]="filterStatus" (selectionChange)="applyFilter()">
+          <mat-option value="">Tous statuts</mat-option>
+          <mat-option value="COMPLETED">COMPLETED</mat-option>
+          <mat-option value="FAILED">FAILED</mat-option>
+          <mat-option value="BUSY">BUSY</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <div class="filter-actions">
+        <button mat-flat-button color="accent" (click)="applyFilter()">
+          <mat-icon>filter_alt</mat-icon> Filtrer
+        </button>
+        <button mat-stroked-button (click)="resetFilter()">
+          <mat-icon>clear</mat-icon> Réinitialiser
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Indicateur de chargement -->
+  <mat-progress-bar mode="indeterminate" *ngIf="loading"></mat-progress-bar>
+
+  <!-- Disposition principale : Tableau + Panneau de détail -->
+  <div class="content-split" [class.has-detail]="selectedCdr">
+    <mat-card class="table-card">
+      <div class="table-wrapper">
+        <table mat-table [dataSource]="dataSource" class="modern-table">
+
+          <!-- Type de Service -->
+          <ng-container matColumnDef="serviceType">
+            <th mat-header-cell *matHeaderCellDef> Service </th>
+            <td mat-cell *matCellDef="let cdr">
+              <span class="service-badge" [class.voice]="cdr.serviceType === 'VOICE'" [class.data]="cdr.serviceType === 'DATA'">
+                <mat-icon>{{ cdr.serviceType === 'VOICE' ? 'phone' : 'wifi' }}</mat-icon>
+                {{ cdr.serviceType }}
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- MSISDN Appelant -->
+          <ng-container matColumnDef="callerMsisdn">
+            <th mat-header-cell *matHeaderCellDef> Numéro Source </th>
+            <td mat-cell *matCellDef="let cdr" class="font-mono font-bold">
+              {{ cdr.callerMsisdn }}
+            </td>
+          </ng-container>
+
+          <!-- MSISDN Appelé / Destination -->
+          <ng-container matColumnDef="calleeMsisdn">
+            <th mat-header-cell *matHeaderCellDef> Destination / APN </th>
+            <td mat-cell *matCellDef="let cdr" class="font-mono text-muted">
+              {{ cdr.calleeMsisdn || (cdr.apn ? cdr.apn : '—') }}
+            </td>
+          </ng-container>
+
+          <!-- Date / Heure -->
+          <ng-container matColumnDef="startTime">
+            <th mat-header-cell *matHeaderCellDef> Date & Heure </th>
+            <td mat-cell *matCellDef="let cdr">
+              {{ cdr.startTime | date:'dd/MM/yyyy HH:mm:ss' }}
+            </td>
+          </ng-container>
+
+          <!-- Durée -->
+          <ng-container matColumnDef="durationSeconds">
+            <th mat-header-cell *matHeaderCellDef> Durée </th>
+            <td mat-cell *matCellDef="let cdr">
+              {{ formatDuration(cdr.durationSeconds) }}
+            </td>
+          </ng-container>
+
+          <!-- Volume Data -->
+          <ng-container matColumnDef="dataVolumeMb">
+            <th mat-header-cell *matHeaderCellDef> Volume Data </th>
+            <td mat-cell *matCellDef="let cdr">
+              <span *ngIf="cdr.dataVolumeMb > 0" class="data-vol">
+                {{ cdr.dataVolumeMb | number:'1.1-1' }} Mo
+              </span>
+              <span *ngIf="!cdr.dataVolumeMb || cdr.dataVolumeMb === 0" class="text-muted">—</span>
+            </td>
+          </ng-container>
+
+          <!-- Coût -->
+          <ng-container matColumnDef="cost">
+            <th mat-header-cell *matHeaderCellDef> Coût </th>
+            <td mat-cell *matCellDef="let cdr">
+              {{ cdr.cost | number:'1.2-2' }} DH
+            </td>
+          </ng-container>
+
+          <!-- Statut -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef> Statut </th>
+            <td mat-cell *matCellDef="let cdr">
+              <span class="status-pill" [class.success]="cdr.status === 'COMPLETED'">
+                {{ cdr.status }}
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Actions -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef> </th>
+            <td mat-cell *matCellDef="let cdr">
+              <button mat-icon-button (click)="selectCdr(cdr)" matTooltip="Inspecter la session" color="accent">
+                <mat-icon>open_in_new</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;" 
+              [class.selected-row]="selectedCdr?.id === row.id"
+              (click)="selectCdr(row)"></tr>
+        </table>
+      </div>
+
+      <mat-paginator [length]="totalElements" [pageSize]="15" [pageSizeOptions]="[10, 15, 30, 50]" (page)="loadCdrs()" showFirstLastButtons>
+      </mat-paginator>
+    </mat-card>
+
+    <!-- Panneau de détail latéral -->
+    <mat-card class="detail-sidebar" *ngIf="selectedCdr">
+      <div class="sidebar-header">
+        <h3><mat-icon>description</mat-icon> Détail de la Session CDR</h3>
+        <button mat-icon-button (click)="closeDetail()"><mat-icon>close</mat-icon></button>
+      </div>
+
+      <div class="sidebar-content">
+        <div class="meta-item">
+          <span class="lbl">ID Unique Appel (Call ID)</span>
+          <span class="val font-mono code-snippet">{{ selectedCdr.callId }}</span>
+        </div>
+
+        <div class="meta-item">
+          <span class="lbl">Type de Service</span>
+          <span class="val">
+            <span class="service-badge" [class.voice]="selectedCdr.serviceType === 'VOICE'" [class.data]="selectedCdr.serviceType === 'DATA'">
+              <mat-icon>{{ selectedCdr.serviceType === 'VOICE' ? 'phone' : 'wifi' }}</mat-icon>
+              {{ selectedCdr.serviceType }}
+            </span>
+          </span>
+        </div>
+
+        <div class="meta-item">
+          <span class="lbl">MSISDN Source</span>
+          <span class="val font-bold font-mono highlight">{{ selectedCdr.callerMsisdn }}</span>
+        </div>
+
+        <div class="meta-item">
+          <span class="lbl">Destination / Cible</span>
+          <span class="val font-mono">{{ selectedCdr.calleeMsisdn || 'N/A' }}</span>
+        </div>
+
+        <div class="meta-item" *ngIf="selectedCdr.apn">
+          <span class="lbl">Point d'accès réseau (APN)</span>
+          <span class="val font-mono">{{ selectedCdr.apn }}</span>
+        </div>
+
+        <div class="meta-item">
+          <span class="lbl">Date & Heure de début</span>
+          <span class="val">{{ selectedCdr.startTime | date:'dd/MM/yyyy HH:mm:ss' }}</span>
+        </div>
+
+        <div class="meta-item">
+          <span class="lbl">Durée de connexion</span>
+          <span class="val">{{ formatDuration(selectedCdr.durationSeconds) }} ({{ selectedCdr.durationSeconds }}s)</span>
+        </div>
+
+        <div class="meta-item" *ngIf="selectedCdr.dataVolumeMb > 0">
+          <span class="lbl">Volume de données transféré</span>
+          <span class="val font-bold text-accent">{{ selectedCdr.dataVolumeMb }} Mo</span>
+        </div>
+
+        <div class="meta-item">
+          <span class="lbl">Cellule Réseau (Antenne)</span>
+          <span class="val font-mono">{{ selectedCdr.cellId || 'CELL_DEFAULT' }}</span>
+        </div>
+
+        <div class="meta-item">
+          <span class="lbl">Type de communication</span>
+          <span class="val">{{ selectedCdr.callType }}</span>
+        </div>
+
+        <div class="meta-item">
+          <span class="lbl">Tarification</span>
+          <span class="val">{{ selectedCdr.cost }} DH</span>
+        </div>
+
+        <div class="meta-item">
+          <span class="lbl">Statut session</span>
+          <span class="val status-pill success">{{ selectedCdr.status }}</span>
+        </div>
+      </div>
+    </mat-card>
+  </div>
+</div>

@@ -1,0 +1,73 @@
+spring:
+  application:
+    name: call-guard
+  
+  datasource:
+    url: jdbc:postgresql://localhost:5432/fraud_db
+    username: fraud_user
+    password: fraud_pass_2024
+    driver-class-name: org.postgresql.Driver
+  
+  jpa:
+    defer-datasource-initialization: true
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+  
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: fraud-detection-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+  
+  sql:
+    init:
+      mode: always
+
+server:
+  port: 8080
+
+# Configuration JWT
+jwt:
+  secret: telecom_fraud_detection_super_secret_key_2024_projet_soukaina
+  expiration: 86400000  # 24 heures en ms
+
+# Configuration des règles de détection (paramétrables)
+detection:
+  rules:
+    high-volume:
+      max-calls: 50           # Max appels
+      window-minutes: 10      # Fenêtre en minutes
+      score-weight: 30        # Poids dans le score total
+    high-diversity:
+      max-distinct-callees: 30  # Max destinataires distincts
+      window-minutes: 15
+      score-weight: 25
+    short-call-ratio:
+      max-ratio: 0.70         # 70% d'appels courts
+      short-duration-seconds: 5  # Durée considérée 'courte'
+      window-minutes: 10
+      score-weight: 25
+    continuous-activity:
+      window-hours: 2         # Fenêtre d'analyse
+      max-pause-minutes: 20   # Pause max acceptable
+      score-weight: 20
+    high-data-volume:
+      max-data-mb: 1200.0     # Seuil max data en Mo
+      window-minutes: 15      # Fenêtre en minutes
+      score-weight: 35        # Poids dans le score total
+  alert-threshold: 50         # Score min pour générer une alerte
+
+logging:
+  level:
+    com.telecom.fraud: DEBUG
+    org.apache.kafka: WARN

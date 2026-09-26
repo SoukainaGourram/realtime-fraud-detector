@@ -1,0 +1,168 @@
+<div class="dashboard-page">
+  <!-- En-tête du Dashboard -->
+  <div class="page-header">
+    <div class="header-info">
+      <h1><mat-icon>insights</mat-icon> Centre de Surveillance & Détection en Temps Réel</h1>
+      <p class="subtitle">Analyse continue du trafic télécom Telecom (Voix & Sessions Internet) et remontée d'anomalies</p>
+    </div>
+    <div class="header-actions">
+      <a mat-stroked-button routerLink="/cdrs" class="btn-action">
+        <mat-icon>history_edu</mat-icon> Explorer les CDRs
+      </a>
+      <a mat-flat-button color="accent" routerLink="/alerts" class="btn-action">
+        <mat-icon>security</mat-icon> Gérer les Alertes
+      </a>
+    </div>
+  </div>
+
+  <!-- KPI Grid (Métriques Clés) -->
+  <div class="kpi-grid">
+    <!-- Total Alertes -->
+    <div class="kpi-card" *ngIf="stats">
+      <div class="kpi-icon-wrap total">
+        <mat-icon>notifications_active</mat-icon>
+      </div>
+      <div class="kpi-data">
+        <span class="kpi-label">Total Alertes Fraude</span>
+        <span class="kpi-val">{{ stats.countByLevel.LOW + stats.countByLevel.MEDIUM + stats.countByLevel.HIGH + stats.countByLevel.CRITICAL }}</span>
+        <span class="kpi-hint">Toutes sévérités confondues</span>
+      </div>
+    </div>
+
+    <!-- Alertes Critiques -->
+    <div class="kpi-card critical" *ngIf="stats">
+      <div class="kpi-icon-wrap critical">
+        <mat-icon>gpp_bad</mat-icon>
+      </div>
+      <div class="kpi-data">
+        <span class="kpi-label">Menaces Critiques</span>
+        <span class="kpi-val text-danger">{{ stats.countByLevel.CRITICAL }}</span>
+        <span class="kpi-hint">Score de risque > 75</span>
+      </div>
+    </div>
+
+    <!-- Alertes Élevées -->
+    <div class="kpi-card high" *ngIf="stats">
+      <div class="kpi-icon-wrap high">
+        <mat-icon>warning</mat-icon>
+      </div>
+      <div class="kpi-data">
+        <span class="kpi-label">Menaces Élevées</span>
+        <span class="kpi-val text-warning">{{ stats.countByLevel.HIGH }}</span>
+        <span class="kpi-hint">Score entre 51 et 75</span>
+      </div>
+    </div>
+
+    <!-- Total CDRs Surveillés (Voix + Data) -->
+    <div class="kpi-card network">
+      <div class="kpi-icon-wrap network">
+        <mat-icon>cell_tower</mat-icon>
+      </div>
+      <div class="kpi-data">
+        <span class="kpi-label">Trafic Réseau Analysé</span>
+        <span class="kpi-val text-info">{{ (cdrStats?.totalCdrs || 0) | number }}</span>
+        <span class="kpi-hint" *ngIf="cdrStats">
+          📞 {{ cdrStats.voiceCount }} voix • 🌐 {{ cdrStats.dataCount }} data
+        </span>
+        <span class="kpi-hint" *ngIf="!cdrStats">Flux continu Kafka</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenu Principal (Graphique + Flux Live) -->
+  <div class="main-grid">
+    <!-- Bloc Graphique & Top Alertes -->
+    <div class="chart-column">
+      <mat-card class="chart-card">
+        <mat-card-header class="card-header">
+          <mat-card-title>
+            <mat-icon>bar_chart</mat-icon> Répartition par Niveau de Sévérité
+          </mat-card-title>
+          <span class="card-badge">Actualisé en continu</span>
+        </mat-card-header>
+
+        <mat-card-content class="chart-content">
+          <div class="canvas-container">
+            <canvas baseChart
+              [data]="chartData"
+              [options]="chartOptions"
+              [type]="'bar'">
+            </canvas>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Dernières alertes critiques / top suspects -->
+      <mat-card class="suspects-card" *ngIf="stats?.topAlerts && stats!.topAlerts.length > 0">
+        <mat-card-header class="card-header">
+          <mat-card-title>
+            <mat-icon>priority_high</mat-icon> Top Alertes Prioritaires
+          </mat-card-title>
+        </mat-card-header>
+
+        <mat-card-content class="suspects-table">
+          <div class="suspect-row header">
+            <span>Numéro MSISDN</span>
+            <span>Type Détecté</span>
+            <span>Score</span>
+            <span>Statut</span>
+          </div>
+
+          <div class="suspect-row" *ngFor="let a of stats?.topAlerts?.slice(0, 5)">
+            <span class="font-mono font-bold">{{ a.callerMsisdn }}</span>
+            <span class="text-type">{{ a.alertType }}</span>
+            <span><strong class="score-tag">{{ a.riskScore }}/100</strong></span>
+            <span>
+              <span class="badge badge-{{ a.riskLevel | lowercase }}">{{ a.riskLevel }}</span>
+            </span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Bloc Flux Temps Réel WebSocket -->
+    <div class="live-column">
+      <mat-card class="live-card">
+        <mat-card-header class="card-header">
+          <mat-card-title>
+            <mat-icon>stream</mat-icon> Flux d'Alertes en Direct
+          </mat-card-title>
+          <div class="live-pill" [class.active]="wsService.isConnected">
+            <span class="pulse"></span> LIVE
+          </div>
+        </mat-card-header>
+
+        <mat-card-content class="live-content">
+          <div class="alert-feed">
+            <div *ngIf="liveAlerts.length === 0" class="empty-feed">
+              <mat-icon>satellite_alt</mat-icon>
+              <p>En attente des prochains événements réseau...</p>
+              <small>Le simulateur injecte le trafic en continu sur le topic Kafka.</small>
+            </div>
+
+            <div class="alert-item" *ngFor="let alert of liveAlerts" [class.critical]="alert.riskLevel === 'CRITICAL'">
+              <div class="item-top">
+                <span class="msisdn font-mono">{{ alert.callerMsisdn }}</span>
+                <span class="badge badge-{{ alert.riskLevel | lowercase }}">{{ alert.riskLevel }}</span>
+              </div>
+
+              <div class="item-middle">
+                <span class="type">{{ alert.alertType }}</span>
+                <span class="score">Score: {{ alert.riskScore }}</span>
+              </div>
+
+              <div class="item-desc" *ngIf="alert.description">
+                {{ alert.description }}
+              </div>
+
+              <div class="item-bottom">
+                <span class="time">{{ alert.createdAt | date:'HH:mm:ss' }}</span>
+                <a [routerLink]="['/alerts']" class="inspect-link">Examiner &rarr;</a>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>

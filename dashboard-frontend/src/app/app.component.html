@@ -1,0 +1,87 @@
+<!-- Application Shell quand l'utilisateur est connecté -->
+<div class="app-layout" *ngIf="authService.isLoggedIn; else loginView">
+  
+  <!-- Navigation Latérale (Sidebar) -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-logo">
+        <mat-icon>shield</mat-icon>
+      </div>
+      <div class="brand-text">
+        <span class="brand-title">CALL GUARD</span>
+        <span class="brand-subtitle">TELECOM • Fraude & CDR</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">SURVEILLANCE & RECHERCHE</div>
+
+      <a routerLink="/dashboard" routerLinkActive="active" class="nav-link">
+        <mat-icon>dashboard</mat-icon>
+        <span>Tableau de Bord</span>
+        <span class="live-dot" *ngIf="wsService.isConnected"></span>
+      </a>
+
+      <a routerLink="/cdrs" routerLinkActive="active" class="nav-link">
+        <mat-icon>history_edu</mat-icon>
+        <span>Historique CDRs</span>
+        <span class="badge-mini">Voix+Data</span>
+      </a>
+
+      <a routerLink="/alerts" routerLinkActive="active" class="nav-link">
+        <mat-icon>warning_amber</mat-icon>
+        <span>Alertes de Fraude</span>
+      </a>
+    </nav>
+
+    <!-- Pied de Sidebar : Profil Utilisateur -->
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="avatar">
+          <mat-icon>account_circle</mat-icon>
+        </div>
+        <div class="user-details">
+          <span class="username">{{ authService.currentUser?.username }}</span>
+          <span class="user-role">{{ authService.currentUser?.role?.replace('ROLE_', '') }}</span>
+        </div>
+        <button mat-icon-button class="logout-btn" (click)="logout()" matTooltip="Déconnexion">
+          <mat-icon>logout</mat-icon>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Zone de Contenu Principale -->
+  <div class="main-wrapper">
+    <!-- Barre Supérieure -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <span class="system-tag">Plateforme Événementielle Telecom</span>
+      </div>
+
+      <div class="topbar-right">
+        <!-- Indicateur de flux temps réel -->
+        <div class="ws-status" [class.connected]="wsService.isConnected">
+          <div class="pulse-dot"></div>
+          <span>{{ wsService.isConnected ? 'STREAMING TEMPS RÉEL ACTIF' : 'CONNEXION WEBSOCKET...' }}</span>
+        </div>
+
+        <a href="http://localhost:8080/swagger-ui.html" target="_blank" class="api-docs-link" matTooltip="Ouvrir Swagger UI">
+          <mat-icon>api</mat-icon> API REST
+        </a>
+      </div>
+    </header>
+
+    <!-- Vue du composant actif -->
+    <main class="main-content-scroll">
+      <div class="view-container">
+        <router-outlet></router-outlet>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Mode déconnecté (Page Login plein écran) -->
+<ng-template #loginView>
+  <router-outlet></router-outlet>
+</ng-template>

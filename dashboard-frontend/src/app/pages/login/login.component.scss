@@ -1,0 +1,183 @@
+.login-wrapper {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-main);
+  padding: 20px;
+  overflow: hidden;
+
+  .login-glow {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(142, 36, 170, 0.25) 0%, rgba(233, 30, 99, 0.1) 45%, transparent 70%);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+}
+
+.login-card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 440px;
+  padding: 32px;
+  background: rgba(24, 26, 40, 0.9) !important;
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6) !important;
+  animation: fadeIn 0.4s ease-out;
+
+  .login-brand {
+    text-align: center;
+    margin-bottom: 28px;
+
+    .brand-icon {
+      width: 56px;
+      height: 56px;
+      margin: 0 auto 14px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--telecom-primary), var(--telecom-magenta));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      box-shadow: 0 8px 25px rgba(233, 30, 99, 0.4);
+
+      mat-icon {
+        font-size: 32px;
+        width: 32px;
+        height: 32px;
+      }
+    }
+
+    h2 {
+      margin: 0 0 6px;
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      background: linear-gradient(90deg, #fff, #ce93d8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .telecom-badge {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #e1bee7;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      background: rgba(142, 36, 170, 0.25);
+      border: 1px solid rgba(142, 36, 170, 0.4);
+      padding: 2px 10px;
+      border-radius: 20px;
+      margin-bottom: 8px;
+    }
+
+    .brand-desc {
+      margin: 6px 0 0;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+  }
+
+  .login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    .full-width {
+      width: 100%;
+    }
+
+    .error-banner {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      background: rgba(255, 82, 82, 0.15);
+      border: 1px solid rgba(255, 82, 82, 0.35);
+      border-radius: 8px;
+      color: #ff8a80;
+      font-size: 0.85rem;
+      margin-bottom: 8px;
+
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+    }
+
+    .submit-btn {
+      height: 48px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      border-radius: 10px;
+      background: linear-gradient(90deg, var(--telecom-primary), var(--telecom-magenta)) !important;
+      color: #fff !important;
+      margin-top: 8px;
+      transition: opacity 0.2s, transform 0.2s;
+
+      &:hover:not([disabled]) {
+        opacity: 0.92;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(233, 30, 99, 0.35);
+      }
+    }
+  }
+
+  .demo-box {
+    margin-top: 24px;
+    padding: 14px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+
+    .demo-title {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #8c93b0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+
+      mat-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+        color: var(--telecom-primary-light);
+      }
+    }
+
+    .demo-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+
+      .demo-chip {
+        font-size: 0.75rem;
+        background: rgba(255, 255, 255, 0.05);
+        color: #d1d5db;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-family: 'SFMono-Regular', Consolas, Menlo, monospace;
+      }
+    }
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}

@@ -1,0 +1,206 @@
+<div class="page-container">
+  <!-- En-tête de la page -->
+  <div class="page-header">
+    <div class="header-info">
+      <h1><mat-icon>warning_amber</mat-icon> Gestion des Alertes de Fraude</h1>
+      <p class="subtitle">Enquêtes, validation métier, faux-positifs et historique des détections</p>
+    </div>
+    <div class="header-actions">
+      <button mat-stroked-button (click)="exportCsv()" matTooltip="Télécharger en CSV">
+        <mat-icon>download</mat-icon> Exporter CSV
+      </button>
+      <button mat-flat-button color="primary" (click)="loadAlerts()" [disabled]="loading">
+        <mat-icon>refresh</mat-icon> Actualiser
+      </button>
+    </div>
+  </div>
+
+  <!-- Barre de filtres -->
+  <mat-card class="filter-panel">
+    <mat-card-content class="filter-form">
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Numéro MSISDN suspect</mat-label>
+        <mat-icon matPrefix>search</mat-icon>
+        <input matInput [(ngModel)]="filterMsisdn" placeholder="Ex: +212661000001" (keyup.enter)="applyFilter()">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field-small">
+        <mat-label>Niveau de risque</mat-label>
+        <mat-select [(ngModel)]="filterRiskLevel" (selectionChange)="applyFilter()">
+          <mat-option value="">Tous les niveaux</mat-option>
+          <mat-option value="CRITICAL">🔴 CRITIQUE</mat-option>
+          <mat-option value="HIGH">🟠 ÉLEVÉ</mat-option>
+          <mat-option value="MEDIUM">🟡 MOYEN</mat-option>
+          <mat-option value="LOW">🟢 FAIBLE</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field-small">
+        <mat-label>Statut d'investigation</mat-label>
+        <mat-select [(ngModel)]="filterStatus" (selectionChange)="applyFilter()">
+          <mat-option value="">Tous les statuts</mat-option>
+          <mat-option value="NEW">NOUVEAU</mat-option>
+          <mat-option value="REVIEWED">EN COURS DE REVUE</mat-option>
+          <mat-option value="CONFIRMED">FRAUDE CONFIRMÉE</mat-option>
+          <mat-option value="FALSE_POSITIVE">FAUX POSITIF</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <div class="filter-actions">
+        <button mat-flat-button color="accent" (click)="applyFilter()">
+          <mat-icon>filter_alt</mat-icon> Filtrer
+        </button>
+        <button mat-stroked-button (click)="resetFilter()">
+          <mat-icon>clear</mat-icon> Réinitialiser
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Barre de chargement -->
+  <mat-progress-bar mode="indeterminate" *ngIf="loading"></mat-progress-bar>
+
+  <!-- Disposition principale : Tableau + Panneau d'inspection -->
+  <div class="content-split" [class.has-detail]="selectedAlert">
+    <mat-card class="table-card">
+      <div class="table-wrapper">
+        <table mat-table [dataSource]="dataSource" matSort class="modern-table">
+
+          <!-- MSISDN -->
+          <ng-container matColumnDef="callerMsisdn">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Numéro Suspect (MSISDN) </th>
+            <td mat-cell *matCellDef="let alert" class="font-mono font-bold">
+              {{ alert.callerMsisdn }}
+            </td>
+          </ng-container>
+
+          <!-- Type -->
+          <ng-container matColumnDef="alertType">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Type d'Anomalie </th>
+            <td mat-cell *matCellDef="let alert" class="type-tag">
+              {{ alert.alertType }}
+            </td>
+          </ng-container>
+
+          <!-- Score -->
+          <ng-container matColumnDef="riskScore">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Score </th>
+            <td mat-cell *matCellDef="let alert">
+              <span class="score-badge">{{ alert.riskScore }}/100</span>
+            </td>
+          </ng-container>
+
+          <!-- Niveau -->
+          <ng-container matColumnDef="riskLevel">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Sévérité </th>
+            <td mat-cell *matCellDef="let alert">
+              <span class="badge badge-{{ alert.riskLevel | lowercase }}">{{ alert.riskLevel }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Statut -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Statut </th>
+            <td mat-cell *matCellDef="let alert">
+              <span class="badge badge-{{ alert.status | lowercase }}">{{ alert.status }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Date -->
+          <ng-container matColumnDef="createdAt">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Détecté le </th>
+            <td mat-cell *matCellDef="let alert">
+              {{ alert.createdAt | date:'dd/MM/yyyy HH:mm' }}
+            </td>
+          </ng-container>
+
+          <!-- Actions -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef> </th>
+            <td mat-cell *matCellDef="let alert">
+              <button mat-icon-button color="accent" (click)="openDetail(alert)" matTooltip="Examiner l'alerte">
+                <mat-icon>open_in_new</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+              [class.selected-row]="selectedAlert?.id === row.id"
+              (click)="openDetail(row)"></tr>
+        </table>
+      </div>
+
+      <mat-paginator [length]="totalElements" [pageSizeOptions]="[10, 25, 50]" (page)="loadAlerts()" showFirstLastButtons>
+      </mat-paginator>
+    </mat-card>
+
+    <!-- Panneau de détail d'enquête latéral -->
+    <mat-card class="detail-sidebar" *ngIf="selectedAlert">
+      <div class="sidebar-header">
+        <div>
+          <h3><mat-icon>fingerprint</mat-icon> Dossier d'Investigation</h3>
+          <span class="alert-id font-mono">{{ selectedAlert.alertId }}</span>
+        </div>
+        <button mat-icon-button (click)="closeDetail()"><mat-icon>close</mat-icon></button>
+      </div>
+
+      <div class="sidebar-content">
+        <div class="meta-item">
+          <span class="lbl">MSISDN Suspect</span>
+          <span class="val font-bold font-mono highlight-number">{{ selectedAlert.callerMsisdn }}</span>
+        </div>
+
+        <div class="meta-item">
+          <span class="lbl">Type de Fraude Présumée</span>
+          <span class="val text-accent font-bold">{{ selectedAlert.alertType }}</span>
+        </div>
+
+        <div class="meta-item">
+          <div class="score-header">
+            <span class="lbl">Score de Risque</span>
+            <span class="score-number">{{ selectedAlert.riskScore }}/100</span>
+          </div>
+          <mat-progress-bar mode="determinate" [value]="selectedAlert.riskScore"
+            [color]="selectedAlert.riskScore > 75 ? 'warn' : (selectedAlert.riskScore > 50 ? 'accent' : 'primary')">
+          </mat-progress-bar>
+        </div>
+
+        <div class="meta-item">
+          <span class="lbl">Diagnostic & Description</span>
+          <p class="description-box">{{ selectedAlert.description }}</p>
+        </div>
+
+        <div class="meta-item" *ngIf="parsedRules">
+          <span class="lbl">Règles Déclenchées</span>
+          <div class="rules-list">
+            <span class="rule-chip" *ngFor="let r of parsedRules">{{ r }}</span>
+          </div>
+        </div>
+
+        <div class="meta-item" *ngIf="selectedAlert.reviewedBy">
+          <span class="lbl">Dernière revue par</span>
+          <span class="val">{{ selectedAlert.reviewedBy }} ({{ selectedAlert.reviewedAt | date:'dd/MM HH:mm' }})</span>
+        </div>
+
+        <!-- Actions de validation Analyste / Admin -->
+        <div class="actions-section" *ngIf="authService.currentUser?.role === 'ANALYST' || authService.currentUser?.role === 'ADMIN'">
+          <span class="lbl">Actions de Résolution</span>
+          <div class="action-buttons">
+            <button mat-flat-button color="warn" class="btn-block"
+              [disabled]="selectedAlert.status === 'CONFIRMED'"
+              (click)="reviewAlert(selectedAlert.id, 'CONFIRMED')">
+              <mat-icon>block</mat-icon> Confirmer Fraude & Bloquer
+            </button>
+
+            <button mat-stroked-button class="btn-block btn-fp"
+              [disabled]="selectedAlert.status === 'FALSE_POSITIVE'"
+              (click)="reviewAlert(selectedAlert.id, 'FALSE_POSITIVE')">
+              <mat-icon>check_circle</mat-icon> Marquer Faux Positif
+            </button>
+          </div>
+        </div>
+      </div>
+    </mat-card>
+  </div>
+</div>
